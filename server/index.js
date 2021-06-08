@@ -50,6 +50,13 @@ app.post("/pizzas", (request, response) => {
   });
 });
 
+app.get("/pizzas", (request, response) => {
+  Pizza.find({}, (error, data) => {
+    if (error) return response.sendStatus(500).json(error);
+    return response.json(data);
+  });
+});
+
 app.route("/pizzas/:id").get((request, response) => {
   // express adds a "params" Object to requests
   const id = request.params.id;
