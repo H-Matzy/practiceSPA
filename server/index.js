@@ -1,6 +1,8 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 const express = require("express");
+const pizzas = require("./controllers/pizzas");
+const orders = require("./controllers/orders");
 
 mongoose.connect(process.env.DB_CONNECT);
 const app = express();
@@ -32,42 +34,24 @@ app
   .post((request, response) => {
     response.json(request.body);
   });
-//Contract of the data
-const pizzaSchema = new mongoose.Schema({
-  crust: String,
-  cheese: String,
-  sauce: String,
-  toppings: [String]
-});
-// Convert Schema a Model with CRUD Operators
-const Pizza = mongoose.model("Pizza", pizzaSchema);
 
 //Create route (post)
-app.post("/pizzas", (request, response) => {
-  const newPizza = new Pizza(request.body);
-  newPizza.save((err, pizza) => {
-    return err ? response.sendStatus(500).json(err) : response.json(pizza);
-  });
-});
 
-app.get("/pizzas", (request, response) => {
-  Pizza.find({}, (error, data) => {
-    if (error) return response.sendStatus(500).json(error);
-    return response.json(data);
-  });
-});
-
-app.route("/pizzas/:id").get((request, response) => {
-  // express adds a "params" Object to requests
-  const id = request.params.id;
-  // handle GET request for post with an id of "id"
-  // response.send(`Your ID was ${id}`);
-  response.status(418).json({
-    id: id
-  });
-});
+// app.route("/pizzas/:id").get((request, response) => {
+//   // express adds a "params" Object to requests
+//   const id = request.params.id;
+//   // handle GET request for post with an id of "id"
+//   // response.send(`Your ID was ${id}`);
+//   response.status(418).json({
+//     id: id
+//   });
+// });
 
 //Line below is always last
+
+app.use("/pizzas", pizzas);
+app.use("/orders", orders);
+
 app.route("/**").get((request, response) => {
   response.status(404).send("Not Found");
 });
