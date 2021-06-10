@@ -6,16 +6,67 @@ import axios from "axios";
 
 const router = new Navigo(window.location.origin);
 
+// router.hooks({
+//   before: (done, params) => {
+//     const page =
+//       params && params.hasOwnProperty("page")
+//         ? capitalize(params.page)
+//         : "Home";
+
+//     if (page === "Pizzas") {
+//       state.Pizzas.pizzas = [];
+//       axios.get(`${process.env.PIZZAS_API_URL}/pizzas`).then(response => {
+//         response.data.forEach(pizza => {
+//           state.Pizzas.pizzas.push(pizza);
+//           done();
+//         });
+//       });
+//     }
+//     if (page === "Blog") {
+//       axios.get("https://jsonplaceholder.typicode.com/posts").then(response => {
+//         response.data.forEach(post => {
+//           state.Blog.posts.push(post);
+//         });
+//         done();
+//       });
+//     }
+
+//     if (page === "Home") {
+//       done();
+//     }
+//   }
+// });
 router.hooks({
   before: (done, params) => {
-    axios.get("https://jsonplaceholder.typicode.com/posts").then(response => {
-      response.data.forEach(post => {
-        state.Blog.posts.push(post);
-      });
-      done();
-    });
+    const page =
+      params && params.hasOwnProperty("page")
+        ? capitalize(params.page)
+        : "Home";
+    switch (page) {
+      case "Pizzas":
+        state.Pizzas.pizzas = [];
+        axios.get(`${process.env.PIZZAS_API_URL}/pizzas`).then(response => {
+          state.Pizzas.pizzas = response.data;
+          done();
+        });
+        break;
+      case "Blog":
+        state.Blog.posts = [];
+        axios
+          .get("https://jsonplaceholder.typicode.com/posts")
+          .then(response => {
+            response.data.forEach(post => {
+              state.Blog.posts.push(post);
+            });
+            done();
+          });
+        break;
+      default:
+        done();
+    }
   }
 });
+
 router
   .on({
     ":page": params => render(state[capitalize(params.page)]),
